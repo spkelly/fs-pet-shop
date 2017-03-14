@@ -22,11 +22,11 @@ function read(index){
 
 function create(age, kind, name){
   if(process.argv.length < 6 || process.argv.length > 9) {
-    console.log(`USAGE: Usage: node ${fileName} create AGE KIND NAME`);
+    console.error(`Usage: node ${fileName} create AGE KIND NAME`);
     process.exit(1);
   }
   let animal = {};
-  animal['age'] = age;
+  animal['age'] = Number.parseInt(age);
   animal['kind'] = kind;
   animal['name'] = name;
   fs.readFile('./pets.json','utf8',function(err,data) {
@@ -57,7 +57,6 @@ switch (command) {
     read(process.argv[3]);
     break;
   case 'create':
-    console.log('creating');
     create(process.argv[3],process.argv[4],process.argv[5]);
     break;
   case 'update':
@@ -67,6 +66,6 @@ switch (command) {
     console.log('destroying');
     break;
   default:
-    console.log(`USAGE: node ${fileName} [read | create | update | destroy]`);
+    console.error(`Usage: node ${fileName} [read | create | update | destroy]`);
     process.exit(1);
 }
