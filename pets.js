@@ -1,4 +1,4 @@
-'use strict';
+// 'use strict';
 
 function read(index){
   if(index != undefined){

@@ -13,7 +13,8 @@ app.disable('x-powered-by');
 app.get('/pets', (req,res) => {
   fs.readFile('pets.json','utf8', (err, data) => {
     res.type('json');
-    res.send(data);
+    let parsed = JSON.parse(data);
+    res.send(parsed);
   });
 });
 
@@ -38,7 +39,6 @@ app.get('/pets/:index', (req, res) => {
 app.use((req, res) => {
   res.sendStatus('404');
 });
-
 
 app.listen(port, function() {
   console.log('Listening on port', port);
