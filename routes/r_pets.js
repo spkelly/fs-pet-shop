@@ -14,42 +14,48 @@ router.get('/:index', (req,res, next) => {
 
 router.post('/', (req, res, next) => {
   let pet = req.body;
-  console.log(pet);
   res.header('Content-Type', 'application/json');
-  console.log('age',parseInt(pet.age));
-  if(!pet.age ||!pet.kind ||!pet.name){
+  if (!pet.age ||!pet.kind ||!pet.name) {
     res.header('Content-Type', 'text/plain');
     res.sendStatus('400');
   }
-  else if(isNaN(pet.age)){
+  else if (isNaN(pet.age)) {
     res.header('Content-Type', 'text/plain');
-    console.log('age',parseInt(pet.age));
     res.sendStatus('404');
   }
-  else{
+  else {
     httpFileWriter('pets.json',pet,res);
   }
 });
 
-router.put('/:index', (req, res, next) =>{
+router.patch('/:index', (req, res, next) =>{
   let index = parseInt(req.params.index);
-
+  let pet = req.body;
+  if (!pet.age && !pet.kind && !pet.name) {
+    res.header('Content-Type', 'text/plain');
+    res.sendStatus('400');
+  }
+  else if (pet.age && isNaN(pet.age)) {
+    res.header('Content-Type', 'text/plain');
+    res.sendStatus('400');
+  }
+  else{
+    httpFileUpdater('pets.json',pet, index, res);
+  }
 });
 
-router.delete('/:index',(req,res,next) =>{
+router.delete('/:index',(req,res, next) =>{
   let index = parseInt(req.params.index);
   fs.readFile('pets.json','utf8',(err,data) =>{
-    if(err) res.sendStatus('404');
+    if(err) throw err;
+
     let parsed = JSON.parse(data);
     if(index >= 0 && index < parsed.length){
 
-      console.log('Parsed', parsed);
       res.header('Content-Type', 'application/json');
-      console.log('parsed before splice',parsed);
       let petToDelete = parsed.splice(index,1);
-      console.log('pet to Delete',petToDelete);
       fs.writeFile('pets.json', JSON.stringify(parsed), (err) =>{
-        if(err) throw err
+        if(err) throw err;
         //console.log("in here");
         res.send(petToDelete[0]);
       });
@@ -66,7 +72,6 @@ function httpFileReader(filename, res ,index){
   fs.readFile('pets.json','utf8',(err,data) =>{
     if(err) res.sendStatus('404');
     let parsed = JSON.parse(data);
-    console.log(parsed);
     if(index){
       if(index >= 0 && index < parsed.length){
         res.header('Content-Type', 'application/json');
@@ -89,7 +94,6 @@ function httpFileWriter(filename,pet,res){
     if(err) res.sendStatus('404');
     let parsed = JSON.parse(petData);
     parsed.push(pet);
-    console.log('parsed',parsed);
     fs.writeFile('pets.json', JSON.stringify(parsed), (err) =>{
       if(err) throw err
       res.send(pet);
@@ -98,13 +102,19 @@ function httpFileWriter(filename,pet,res){
 
 }
 
-function httpFileUpdater(filename,pet,res){
+function httpFileUpdater(filename,pet,index,res){
   fs.readFile('pets.json','utf8',(err,petData) =>{
-    if(err) res.sendStatus('404');
+    if(err){
+      res.sendStatus('404');
+    }
+
     let parsed = JSON.parse(petData);
+    for(key in pet){
+      parsed[index][key] = pet[key];
+    }
     fs.writeFile('pets.json', JSON.stringify(parsed), (err) =>{
       if(err) throw err
-      res.send(pet);
+      res.send(parsed[index]);
     });
   });
 }
